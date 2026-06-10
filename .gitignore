@@ -1,0 +1,25 @@
+# Data — too large for git (CGWB/State board CSVs, 50MB–2.5GB)
+*.csv
+!improvement_results.csv
+!day2_ablation_results.csv
+!day2_corrected_ablation.csv
+
+# Model binaries (jalvaani_model_best.pkl alone is 2.5 GB)
+*.pkl
+*.pth
+# exception: final Day 2 NN weights are small (295 KB)
+!jalvaani_physicsnn_day2_final.pth
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+venv/
+.venv/
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
