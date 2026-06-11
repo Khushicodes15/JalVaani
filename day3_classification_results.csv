@@ -1,0 +1,13 @@
+Eval,Contaminant,Model,Precision,Recall,F1_macro,ROC_AUC
+random_split,fluoride_high_risk,Logistic Regression,1.0,1.0,1.0,1.0
+random_split,fluoride_high_risk,Random Forest,1.0,1.0,1.0,1.0
+random_split,fluoride_high_risk,XGBoost,1.0,1.0,1.0,1.0
+random_split,arsenic_high_risk,Logistic Regression,1.0,1.0,1.0,1.0
+random_split,arsenic_high_risk,Random Forest,1.0,1.0,1.0,1.0
+random_split,arsenic_high_risk,XGBoost,1.0,1.0,1.0,1.0
+random_split,nitrate_high_risk,Logistic Regression,1.0,1.0,1.0,1.0
+random_split,nitrate_high_risk,Random Forest,1.0,1.0,1.0,1.0
+random_split,nitrate_high_risk,XGBoost,1.0,1.0,1.0,1.0
+leave_states_out,fluoride_high_risk,XGBoost,0.7124523194803367,0.7054403973022074,0.708559182885554,0.8031197442086224
+leave_states_out,arsenic_high_risk,XGBoost,0.5092872765219513,0.5026657025501458,0.4728614253803062,0.40630595679884546
+leave_states_out,nitrate_high_risk,XGBoost,0.5116838547163014,0.5112696142441591,0.5031208687016313,0.49523167736866147
