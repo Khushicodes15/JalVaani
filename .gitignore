@@ -3,12 +3,19 @@
 !improvement_results.csv
 !day2_ablation_results.csv
 !day2_corrected_ablation.csv
+!day3_classification_results.csv
+!day4_uncertainty_results.csv
+# small official CGWB source data (Rajya Sabha AU-1211) — keep in repo
+!RS_Session_267_AU_1211_C_to_D_i.csv
 
 # Model binaries (jalvaani_model_best.pkl alone is 2.5 GB)
 *.pkl
 *.pth
 # exception: final Day 2 NN weights are small (295 KB)
 !jalvaani_physicsnn_day2_final.pth
+# exceptions: small Day 4 conformal artifacts (reproduce intervals without retraining)
+!jalvaani_conformal_scores.pkl
+!jalvaani_adaptive_qhat.pkl
 
 # Python
 __pycache__/
@@ -17,6 +24,9 @@ __pycache__/
 venv/
 .venv/
 .env
+
+# wiki source pages (published to the separate JalVaani.wiki repo)
+wiki/
 
 # OS / editor
 .DS_Store
