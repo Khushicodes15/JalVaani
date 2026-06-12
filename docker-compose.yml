@@ -1,0 +1,45 @@
+version: "3.9"
+
+# ── JalVaani AI — docker-compose for local production-like runs ───────────────
+#
+# Usage:
+#   docker compose up --build
+#
+# Models and data are bind-mounted from the host so you don't bake large
+# binary files into the image. Adjust paths to match your machine.
+
+services:
+  api:
+    build: .
+    image: jalvaani-api:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      # Large model artifacts — NOT in the image
+      - ./jalvaani_api/saved_models:/app/jalvaani_api/saved_models:ro
+      - ./jalvaani_api/data:/app/jalvaani_api/data:ro
+    environment:
+      - STATIC_DIR=/app/jalvaani_ui/dist
+      - CORS_ORIGINS=http://localhost:8000,http://localhost:80
+      - RATE_LIMIT_RPM=120
+      - CACHE_TTL_NATIONAL_STATS=3600
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s   # Give models time to load
+
+  # Optional: Nginx reverse proxy (uncomment for production with TLS)
+  # nginx:
+  #   image: nginx:1.25-alpine
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./certs:/etc/nginx/certs:ro
+  #   depends_on:
+  #     - api
+  #   restart: unless-stopped

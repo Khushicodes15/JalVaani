@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-sand text-well-900 font-sans;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.well.200') transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-well-200 rounded-full;
+  }
+
+  /* Water ripple rings */
+  .ripple-ring {
+    @apply absolute rounded-full border border-well-300/40 animate-ripple;
+  }
+
+  /* Page transition */
+  .page-enter {
+    @apply animate-fade-in;
+  }
+
+  /* Number badge */
+  .stat-value {
+    @apply text-3xl font-bold tabular-nums text-well-700;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+}

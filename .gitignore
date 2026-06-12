@@ -32,6 +32,10 @@ wiki/
 # session handoff context (local only)
 JALVAANI_SESSION_CONTEXT.md
 
+# Frontend build artifacts
+jalvaani_ui/node_modules/
+jalvaani_ui/dist/
+
 # OS / editor
 .DS_Store
 Thumbs.db

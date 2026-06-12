@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="wg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2E86C1"/>
+      <stop offset="100%" style="stop-color:#1B4F72"/>
+    </linearGradient>
+  </defs>
+  <!-- Water drop -->
+  <path d="M32 4 C32 4, 12 28, 12 40 C12 52 21 60 32 60 C43 60 52 52 52 40 C52 28 32 4 32 4Z"
+        fill="url(#wg)" opacity="0.92"/>
+  <!-- Inner highlight -->
+  <ellipse cx="26" cy="36" rx="5" ry="8" fill="white" opacity="0.25" transform="rotate(-20 26 36)"/>
+</svg>
