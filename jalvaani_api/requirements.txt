@@ -1,0 +1,22 @@
+# JalVaani API — Python dependencies
+# Install: pip install -r requirements.txt
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+gunicorn>=21.0.0             # Production WSGI/ASGI server
+
+# Config
+pydantic>=2.0.0
+pydantic-settings>=2.0.0    # BaseSettings for .env support
+
+# ML / data
+joblib>=1.3.0
+torch>=2.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+xgboost>=2.0.0
+
+# HTTP (for health-check scripts)
+requests>=2.31.0
