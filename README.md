@@ -33,29 +33,71 @@ AI-powered groundwater intelligence platform for India. Predicts water-table dep
 
 ## Day 5 — Multi-Station Depletion Forecasting
 
-`jalvaani_day5_forecasting.py` forecasts station-level groundwater depth at ~3, 6 and 12 months ahead (readings are approximately quarterly) using two sequence models trained under identical settings: a 2-layer LSTM and a 3-layer Transformer encoder. Stations with ≥20 readings contribute sliding 8-reading windows; splits are time-based within each station (last 20% = test) and per-station normalization is fit on train portions only, so no future information leaks into training. A naive last-value baseline sets the minimum bar, and conformal prediction (calibrated on validation sequences) provides 90% forecast intervals. Outputs include `jalvaani_forecasts.csv` — true future forecasts per station with 12-month trend direction — and a national depletion trend map. *(Results pending current training run.)*
+`jalvaani_day5_forecasting.py` forecasts station-level groundwater depth at ~3, 6 and 12 months ahead (readings are approximately quarterly) using two sequence models trained under identical settings: a 2-layer LSTM and a 3-layer Transformer encoder. Stations with ≥20 readings contribute sliding 8-reading windows; splits are time-based within each station (last 20% = test) and per-station normalization is fit on train portions only, so no future information leaks into training. A naive last-value baseline sets the minimum bar, and conformal prediction (calibrated on validation sequences) provides forecast intervals. Both models beat the naive baseline on all three horizons (≥40% RMSE reduction). LSTM is the stronger model at longer ranges (12m RMSE **3.889 mbgl**, R² **0.879**); the Transformer is marginally better at 3m (RMSE 3.171). Of 16,693 forecasted stations, **5,868 (35%) show a predicted depletion trend**; Telangana has the highest average predicted depletion among states with ≥20 stations. Conformal test coverage was 82–84% against a 90% target — a documented limitation of split-conformal under temporal distribution shift.
+
+## Day 6 — FastAPI Backend
+
+`jalvaani_api/` wraps all five days into a single REST API (FastAPI + uvicorn). Models are loaded once at startup; endpoints are stateless. The `/report/full` endpoint integrates depth prediction, contamination risk, depletion forecast, and a physics consistency check into one response with a human-readable summary.
+
+Nine endpoints: `POST /predict/depth`, `POST /predict/contamination`, `GET /forecast/{station_name}`, `POST /report/full`, `GET /stations`, `GET /stations/search?q=`, `GET /stats/national`, `GET /health`, `GET /`. Interactive documentation auto-generated at `http://localhost:8000/docs`.
+
+Backend hardening: every endpoint is `async def` with CPU-bound inference offloaded via `asyncio.to_thread()`; sliding-window rate limiting (120 RPM per IP); GZip compression; thread-safe TTL cache (1 hr national stats, 5 min station pages); env-based config via pydantic-settings.
+
+## Day 7 — Production React UI
+
+`jalvaani_ui/` is a React 18 + Vite 5 + TypeScript + Tailwind CSS frontend connecting to the Day 6 API. Six pages: Dashboard (national stats + depletion chart), Depth Predictor, Contamination Risk (SVG gauge dials), Station Forecast (LSTM timeline with shaded CI band), Full Report, and Station Explorer. Indian water/earth colour palette; responsive to all screen sizes; code-split by route.
+
+Infrastructure: `gunicorn.conf.py` (UvicornWorker + `preload_app=True` for Linux COW memory sharing), `Dockerfile` (multi-stage Node → Python), `docker-compose.yml`, `nginx.conf` (static asset caching, upstream keepalive, request rate limiting).
 
 ## Setup
 
+**Research pipeline (Days 1–5):**
+
 ```bash
 pip install -r requirements.txt
-pip install torch          # Days 2 and 5
-pip install shap matplotlib-venn  # Day 4 / Day 3 extras
+pip install torch shap matplotlib-venn
+# Place cgwb_water_level.csv and state_water_level.csv in the repo root, then:
+python run_real_pipeline.py
+python improve_models.py
+python jalvaani_day2_physics.py && python jalvaani_day2_corrected.py && python jalvaani_day2_finalize.py
+python jalvaani_day3_contamination.py
+python jalvaani_day4_uncertainty_shap.py
+python jalvaani_day5_forecasting.py
 ```
 
-Raw CGWB / State Groundwater Board CSVs and large trained binaries are not tracked in git (see `.gitignore`). Place `cgwb_water_level.csv` and `state_water_level.csv` in the repo root, then run:
+**API (Day 6):**
 
 ```bash
-python run_real_pipeline.py      # Day 1: clean, EDA, baselines
-python improve_models.py        # Day 1: features + stacking ensemble
-python jalvaani_day2_physics.py  # Day 2: physics-guided NN + ablation
-python jalvaani_day2_corrected.py # Day 2: corrected constraints
-python jalvaani_day2_finalize.py  # Day 2: train + save official model
-python jalvaani_day3_contamination.py    # Day 3: contamination risk + LOSO eval
-python jalvaani_day4_uncertainty_shap.py # Day 4: conformal uncertainty + SHAP
-python jalvaani_day5_forecasting.py      # Day 5: LSTM/Transformer forecasting
+# Copy all .pkl/.pth to jalvaani_api/saved_models/ and CSVs to jalvaani_api/data/
+pip install -r jalvaani_api/requirements.txt
+cd jalvaani_api && uvicorn main:app --reload --port 8000
+# → http://localhost:8000/docs
+```
+
+**Full stack with UI (Day 7):**
+
+```bash
+# Terminal 1 — API
+cd jalvaani_api && uvicorn main:app --reload --port 8000
+
+# Terminal 2 — UI dev server (proxies API calls to :8000)
+cd jalvaani_ui && npm install && npm run dev
+# → http://localhost:5173
+
+# Or build for production:
+cd jalvaani_ui && npm run build
+# Set STATIC_DIR=../jalvaani_ui/dist in .env, then:
+cd .. && gunicorn -c gunicorn.conf.py jalvaani_api.main:app
+# → http://localhost:8000
+```
+
+**Docker (single command):**
+
+```bash
+docker compose up --build
+# → http://localhost:8000
 ```
 
 ## Artifacts
 
-`jalvaani_physicsnn_day2_final.pth` — official Day 2 model weights (GroundwaterNet, Version B). Load with the scalers produced by the Day 2 pipeline. Evaluation plots (`*.png`) and ablation metrics (`*results*.csv`) are tracked in the repo.
+`jalvaani_physicsnn_day2_final.pth` — official Day 2 model weights (GroundwaterNet, Version B). `jalvaani_conformal_scores.pkl` + `jalvaani_adaptive_qhat.pkl` — Day 4 conformal artifacts (reproduce uncertainty intervals without retraining). Evaluation plots (`*.png`) and results files (`*results*.csv`) are tracked in the repo. Large binaries (2.5 GB stacking ensemble, LSTM/Transformer weights, station scalers) are not tracked — regenerate by running the pipeline scripts.
